@@ -1,17 +1,21 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpRequest
-from django.shortcuts import redirect
+from .models import Article, Comment, User
+from django.http import Http404
+
 
 def about_blog(request: HttpRequest) -> HttpResponse:
     return HttpResponse(f"This is blog")
 
 
 def show_home(request: HttpRequest) -> HttpResponse:
-    return HttpResponse(f"This is home page")
+    articles = Article.objects.all()
+    return render(request, 'blog/first.html', {'articles': articles})
 
 
 def view_article(request: HttpRequest, article_id: int) -> HttpResponse:
-    return HttpResponse(f"This is page of article {article_id}")
+    article = get_object_or_404(Article, pk=article_id)
+    return render(request, 'blog/article.html', {'article': article})
 
 
 def add_comment(request: HttpRequest, article_id: int) -> HttpResponse:
@@ -34,7 +38,6 @@ def view_topics(request: HttpRequest) -> HttpResponse:
     return HttpResponse(f"This is all topics on blog")
 
 
-
 def subscribe_topic(request: HttpRequest, topic_id: int) -> HttpResponse:
     return HttpResponse(f"Subscribe topic")
 
@@ -44,7 +47,9 @@ def unsubscribe_topic(request: HttpRequest, topic_id: int) -> HttpResponse:
 
 
 def user_profile(request: HttpRequest, username: str) -> HttpResponse:
-    return HttpResponse(f"Username is {username}")
+    user = get_object_or_404(User, username=username)
+    articles = Article.objects.filter(author=user)
+    return render(request, 'blog/user_profile.html', {'user': user, 'articles': articles})
 
 
 def set_password(request: HttpRequest) -> HttpResponse:
